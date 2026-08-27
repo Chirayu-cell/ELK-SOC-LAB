@@ -1,25 +1,28 @@
-# Windows SOC Monitoring Lab — ELK Stack
+# Windows SOC Monitoring & Threat Hunting Lab — ELK Stack
 
-Build notes and detection work from a Windows-focused SOC monitoring lab I ran
-using Elasticsearch, Kibana, Elastic Agent, Sysmon, and Elastic Endpoint
-Security.
+A Windows-focused SOC monitoring and detection engineering lab built with:
 
-**What this repo is:** the configuration, detection logic, and findings from a
-homelab I built to learn Windows telemetry pipelines and detection engineering.
-It is a record of work, not a deployable product — you can't `git clone` this
-and get a running SOC. What you can do is read the detections and the tuning
-notes.
+- **Elasticsearch**
+- **Kibana**
+- **Elastic Agent**
+- **Sysmon**
+- **Elastic Endpoint Security**
+
+Build notes, configuration, and detection work from a homelab I ran to learn
+Windows telemetry pipelines and detection engineering end to end.
 
 ---
 
-## Lab topology
+## Key features
 
-| Component | Role |
-|---|---|
-| Windows 10 VM | Monitored endpoint — Sysmon, Windows Security, PowerShell operational logs |
-| Elastic Agent (Fleet-managed) | Log shipping and endpoint security |
-| Elasticsearch + Kibana | Storage, search, dashboards, detection rules |
-| Attacker host | Generates the simulated activity below |
+- Integrated ingestion of Windows Event Logs, Sysmon logs, PowerShell logs, and
+  Endpoint Security alerts
+- Dashboards tracking:
+  - Failed logons
+  - Suspicious PowerShell
+  - Sysmon process activity
+  - Malware alerts
+- Custom detection rules with MITRE ATT&CK mapping
 
 ![Lab overview](screenshots/overview.jpg)
 
@@ -27,52 +30,66 @@ notes.
 
 ## Techniques simulated
 
-| ATT&CK ID | Technique | Signal used |
+| ATT&CK ID | Technique | Signal |
 |---|---|---|
-| T1110 | Brute Force | Event ID 4625 volume/velocity per source |
-| T1059.001 | PowerShell | Encoded command execution, `-enc` / `-EncodedCommand` |
-| T1059.003 | Windows Command Shell | `cmd.exe` spawned from unusual parents |
-| T1204 | User Execution | EICAR test file execution |
-| T1105 | Ingress Tool Transfer | Outbound transfer via LOLBins |
+| T1110 | Brute Force | Event ID 4625 spikes |
+| T1059 | Command and Scripting Interpreter | PowerShell execution / encoded commands |
+| T1059.003 | Windows Command Shell | `cmd.exe` execution |
+| T1204 | User Execution | EICAR test file |
+| T1105 | Ingress Tool Transfer | Outbound file transfer |
 
 ---
 
-## What I actually learned
+## Dashboard
 
-Two things worth writing down, both of which cost me time:
+Contains:
 
-**4625 volume alone is a bad brute-force detection.** A threshold on failed
-logons fires constantly on a machine where a service account has a stale
-cached credential. What made it usable was correlating on *distinct target
-accounts per source* rather than raw failure count — one account failing 50
-times is a stuck credential, 50 accounts failing once each is spraying.
-
-**Sysmon's default config is too noisy to hunt in.** Without filtering, normal
-workstation activity buries anything interesting. Tuning the config down to the
-event IDs that carry detection value (1, 3, 7, 8, 11, 13) is the difference
-between a searchable index and an expensive one.
+- Failed logons
+- PowerShell command usage
+- Sysmon process trends
+- Malware alerts
+- MITRE ATT&CK coverage table
 
 ---
 
-## Repo contents
+## What I learned
+
+- Building full Windows telemetry pipelines
+- Using Kibana Lens, Timelines, and Detection Rules
+- Threat hunting with Sysmon process chains
+- IR workflow: detect → triage → analyse → contain → remediate
+
+> **Fill this in.** These are your original bullets — they describe *what you
+> did*, which is fine, but the version that lands in an interview describes
+> *what surprised you*. One concrete finding beats four topic labels. Something
+> that cost you an afternoon, a rule that fired on the wrong thing, a
+> Kibana behaviour you didn't expect. Write it in your own words when you
+> remember it, and delete this note.
+
+---
+
+## Repo structure
 
 ```
+windows-elk-soc-lab/
+├── README.md
+├── screenshots/
+│   └── overview.jpg
 ├── configs/
-│   ├── sysmon-config.xml       # Sysmon config used in this lab
-│   ├── fleet-policy.md         # Elastic Agent integration set + notes
-│   └── detection-rules.ndjson  # Kibana detection rules (exported)
-├── docs/
-│   ├── methodology.md          # How the lab was built, in order
-│   ├── attack-scenarios.md     # Each simulation and expected telemetry
-│   └── queries.spl             # Hunting queries
-└── screenshots/
+│   ├── sysmon-config.xml
+│   ├── fleet-policy.md
+│   └── detection-rules.ndjson
+└── docs/
+    ├── methodology.md
+    ├── attack-scenarios.md
+    └── queries.spl
 ```
 
-## Limitations
+---
 
-Single Windows endpoint, no domain controller, no network segmentation. The
-detections here are tuned against one machine's baseline and would need
-rework against real enterprise volume. Endpoint Security was run in detect-only
-mode throughout.
+## Scope
+
+Single Windows endpoint lab. Detections here are tuned against one machine's
+baseline and would need rework against enterprise log volume.
 
 © 2025 Chirayu Paliwal
