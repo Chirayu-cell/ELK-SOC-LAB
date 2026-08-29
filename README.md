@@ -59,13 +59,6 @@ Contains:
 - Threat hunting with Sysmon process chains
 - IR workflow: detect → triage → analyse → contain → remediate
 
-> **Fill this in.** These are your original bullets — they describe *what you
-> did*, which is fine, but the version that lands in an interview describes
-> *what surprised you*. One concrete finding beats four topic labels. Something
-> that cost you an afternoon, a rule that fired on the wrong thing, a
-> Kibana behaviour you didn't expect. Write it in your own words when you
-> remember it, and delete this note.
-
 ---
 
 ## Repo structure
@@ -75,10 +68,6 @@ windows-elk-soc-lab/
 ├── README.md
 ├── screenshots/
 │   └── overview.jpg
-├── configs/
-│   ├── sysmon-config.xml
-│   ├── fleet-policy.md
-│   └── detection-rules.ndjson
 └── docs/
     ├── methodology.md
     ├── attack-scenarios.md
